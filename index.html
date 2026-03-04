@@ -1,0 +1,663 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Numerology Calculator</title>
+    <style>
+      :root {
+        --color-primary: #ffd700;
+        --color-secondary: #ffeb3b;
+        --color-background: #091139;
+        --color-card-bg: rgba(255, 255, 255, 0.1);
+        --color-text: #ffffff;
+        --color-text-light: #cccccc;
+        --color-border: rgba(255, 255, 255, 0.3);
+        --color-circle: #ffffff;
+        --color-circle-border: #333333;
+        --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        --font-size-base: 16px;
+        --spacing-xs: 8px;
+        --spacing-sm: 16px;
+        --spacing-md: 24px;
+        --spacing-lg: 32px;
+        --spacing-xl: 48px;
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: var(--font-family);
+        font-size: var(--font-size-base);
+        background-color: var(--color-background);
+        color: var(--color-text);
+        line-height: 1.6;
+        min-height: 100vh;
+      }
+
+      .container {
+        max-width: 1400px;
+        margin: 0 auto;
+        padding: var(--spacing-md);
+      }
+
+      .main {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        gap: var(--spacing-xl);
+        justify-content: center;
+      }
+
+      .left-panel {
+        width: 300px;
+        flex-shrink: 0;
+      }
+
+      .header {
+        margin-bottom: var(--spacing-md);
+      }
+
+      .header__title {
+        font-size: 2rem;
+        color: var(--color-primary);
+        font-weight: 600;
+        line-height: 1.2;
+      }
+
+      .date-picker-section {
+        background: var(--color-card-bg);
+        padding: var(--spacing-md);
+        border-radius: 8px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      .date-picker__label {
+        display: block;
+        margin-bottom: var(--spacing-sm);
+        font-weight: 500;
+        color: var(--color-text);
+      }
+
+      .date-picker__input {
+        width: 100%;
+        padding: var(--spacing-sm);
+        border: 2px solid var(--color-border);
+        border-radius: 4px;
+        font-size: 1rem;
+        font-family: inherit;
+        transition: border-color 0.3s ease;
+      }
+
+      .date-picker__input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+      }
+
+      .star-section {
+        flex: 1;
+        display: flex;
+        justify-content: center;
+        align-items: flex-start;
+        margin-top: -60px;
+      }
+
+      /* Star diagram styles */
+      .star-diagram {
+        position: relative;
+        width: 800px;
+        height: 800px;
+        margin: 0 auto;
+      }
+
+      .star-diagram__svg {
+        width: 100%;
+        height: 100%;
+      }
+
+      .star-diagram__line {
+        stroke: #ffd700;
+        stroke-width: 2;
+        fill: none;
+      }
+
+      .star-diagram__point {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        background-color: var(--color-circle);
+        border: 2px solid var(--color-circle-border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 18px;
+        transform: translate(-50%, -50%);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        transition: all 0.3s ease;
+      }
+
+      .star-diagram__point:hover {
+        transform: translate(-50%, -50%) scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+        background-color: #f0f8ff;
+      }
+
+      .star-diagram__content {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 2px;
+      }
+
+      .star-diagram__letter {
+        font-size: 11px;
+        color: #666666;
+        font-weight: 500;
+      }
+
+      .star-diagram__value {
+        font-size: 16px;
+        font-weight: 700;
+        color: #333333;
+      }
+
+      /* Responsive design */
+      @media (max-width: 1024px) {
+        .star-diagram {
+          width: 600px;
+          height: 600px;
+        }
+
+        .star-diagram__point {
+          width: 40px;
+          height: 40px;
+          font-size: 14px;
+        }
+      }
+
+      @media (max-width: 1024px) {
+        .main {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .left-panel {
+          width: 100%;
+          max-width: 400px;
+        }
+
+        .header {
+          text-align: center;
+        }
+
+        .star-section {
+          margin-top: 0;
+        }
+      }
+
+      @media (max-width: 768px) {
+        .header__title {
+          font-size: 1.75rem;
+        }
+
+        .container {
+          padding: var(--spacing-sm);
+        }
+
+        .star-diagram {
+          width: 500px;
+          height: 500px;
+        }
+
+        .star-diagram__point {
+          width: 35px;
+          height: 35px;
+          font-size: 12px;
+        }
+
+        .star-diagram__value {
+          font-size: 14px;
+        }
+      }
+
+      @media (max-width: 600px) {
+        .star-diagram {
+          width: 100%;
+          max-width: 400px;
+          height: 400px;
+        }
+
+        .star-diagram__point {
+          width: 30px;
+          height: 30px;
+          font-size: 11px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <main class="main">
+        <div class="left-panel">
+          <header class="header">
+            <h1 class="header__title">Numerology Calculator</h1>
+          </header>
+
+          <section class="date-picker-section">
+            <label for="birthdate" class="date-picker__label">Enter your birth date:</label>
+            <input type="date" id="birthdate" class="date-picker__input" aria-label="Birth date" />
+          </section>
+        </div>
+
+        <section class="star-section">
+          <div id="star-diagram" class="star-diagram">
+            <!-- Star diagram will be rendered here -->
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <script>
+      // Calculator utilities
+      const MAX_VALUE = 31;
+
+      function sumDigits(value) {
+        return Math.abs(value)
+          .toString()
+          .split('')
+          .reduce((sum, digit) => sum + parseInt(digit, 10), 0);
+      }
+
+      function reduceToMaxValue(value) {
+        while (value > MAX_VALUE) {
+          value = sumDigits(value);
+        }
+        return value;
+      }
+
+      function calculateNumerology(birthDate) {
+        const C = birthDate.day > MAX_VALUE ? reduceToMaxValue(birthDate.day) : birthDate.day;
+        const D = birthDate.month > MAX_VALUE ? reduceToMaxValue(birthDate.month) : birthDate.month;
+        const E = birthDate.year > MAX_VALUE ? reduceToMaxValue(birthDate.year) : birthDate.year;
+
+        const F = reduceToMaxValue(C + D + E);
+        const B = reduceToMaxValue(C + D + E + F);
+        const A = reduceToMaxValue(B + C + D + E + F);
+
+        const G = reduceToMaxValue(A + B);
+        const H = reduceToMaxValue(B + C);
+        const I = reduceToMaxValue(C + D);
+        const J = reduceToMaxValue(D + E);
+        const K = reduceToMaxValue(E + F);
+        const L = reduceToMaxValue(F + A);
+
+        const M = reduceToMaxValue(A + G);
+        const N = reduceToMaxValue(A + L);
+        const O = reduceToMaxValue(G + L);
+        const P = reduceToMaxValue(B + G);
+        const Q = reduceToMaxValue(B + H);
+        const R = reduceToMaxValue(H + G);
+        const S = reduceToMaxValue(C + H);
+        const T = reduceToMaxValue(C + I);
+        const U = reduceToMaxValue(H + I);
+        const V = reduceToMaxValue(I + D);
+        const W = reduceToMaxValue(D + J);
+        const X = reduceToMaxValue(I + J);
+        const Y = reduceToMaxValue(J + E);
+        const Z = reduceToMaxValue(E + K);
+        const Ä = reduceToMaxValue(K + J);
+        const Ö = reduceToMaxValue(K + F);
+        const Ü = reduceToMaxValue(F + L);
+        const ß = reduceToMaxValue(L + K);
+
+        return {
+          C,
+          D,
+          E,
+          F,
+          B,
+          A,
+          G,
+          H,
+          I,
+          J,
+          K,
+          L,
+          M,
+          N,
+          O,
+          P,
+          Q,
+          R,
+          S,
+          T,
+          U,
+          V,
+          W,
+          X,
+          Y,
+          Z,
+          Ä,
+          Ö,
+          Ü,
+          ß,
+        };
+      }
+
+      function isValidDate(day, month, year) {
+        if (day < 1 || day > 31) return false;
+        if (month < 1 || month > 12) return false;
+        if (year < 1900 || year > 2100) return false;
+
+        const date = new Date(year, month - 1, day);
+        return (
+          date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day
+        );
+      }
+
+      // StarDiagram class
+      class StarDiagram {
+        constructor(containerId) {
+          const element = document.querySelector(`#${containerId}`);
+          if (!element) {
+            throw new Error(`Container with id "${containerId}" not found`);
+          }
+          this.container = element;
+          this.width = 800;
+          this.height = 800;
+          this.centerX = this.width / 2;
+          this.centerY = this.height / 2;
+        }
+
+        render(calculation) {
+          this.container.innerHTML = '';
+
+          const svg = this.createSVG();
+          this.container.appendChild(svg);
+
+          const points = this.calculatePointPositions(calculation);
+          this.drawStarLines(svg, points);
+          this.addPointCircles(points);
+        }
+
+        createSVG() {
+          const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+          svg.setAttribute('class', 'star-diagram__svg');
+          svg.setAttribute('viewBox', `0 0 ${this.width} ${this.height}`);
+          return svg;
+        }
+
+        calculatePointPositions(calculation) {
+          const outerRadius = 280;
+          const points = [];
+          const pointsMap = {};
+
+          const angleA = 90; // A at bottom
+          const angleB = 90 + 60; // B at bottom-left (150°)
+          const angleC = 90 + 120; // C at top-left (210°)
+          const angleD = 90 + 180; // D at top (270° = -90°)
+          const angleE = 90 + 240; // E at top-right (330° = -30°)
+          const angleF = 90 + 300; // F at bottom-right (30°)
+
+          const mainVertices = [
+            { letter: 'A', value: calculation.A, angle: angleA },
+            { letter: 'B', value: calculation.B, angle: angleB },
+            { letter: 'C', value: calculation.C, angle: angleC },
+            { letter: 'D', value: calculation.D, angle: angleD },
+            { letter: 'E', value: calculation.E, angle: angleE },
+            { letter: 'F', value: calculation.F, angle: angleF },
+          ];
+
+          mainVertices.forEach((vertex) => {
+            const rad = (vertex.angle * Math.PI) / 180;
+            const point = {
+              x: this.centerX + outerRadius * Math.cos(rad),
+              y: this.centerY + outerRadius * Math.sin(rad),
+              letter: vertex.letter,
+              value: vertex.value,
+            };
+            points.push(point);
+            pointsMap[vertex.letter] = point;
+          });
+
+          const intersectionRadius = outerRadius * 0.577;
+          const intersectionVertices = [
+            { letter: 'G', value: calculation.G, angle: (angleA + angleB) / 2 },
+            { letter: 'H', value: calculation.H, angle: (angleB + angleC) / 2 },
+            { letter: 'I', value: calculation.I, angle: (angleC + angleD) / 2 },
+            { letter: 'J', value: calculation.J, angle: (angleD + angleE) / 2 },
+            { letter: 'K', value: calculation.K, angle: (angleE + angleF) / 2 },
+            { letter: 'L', value: calculation.L, angle: (angleF + angleA + 360) / 2 },
+          ];
+
+          intersectionVertices.forEach((vertex) => {
+            const rad = (vertex.angle * Math.PI) / 180;
+            const point = {
+              x: this.centerX + intersectionRadius * Math.cos(rad),
+              y: this.centerY + intersectionRadius * Math.sin(rad),
+              letter: vertex.letter,
+              value: vertex.value,
+            };
+            points.push(point);
+            pointsMap[vertex.letter] = point;
+          });
+
+          const innerTriangles = [
+            { vertices: ['C', 'H', 'I'], midpoints: ['S', 'U', 'T'] },
+            { vertices: ['I', 'D', 'J'], midpoints: ['V', 'W', 'X'] },
+            { vertices: ['J', 'E', 'K'], midpoints: ['Y', 'Z', 'Ä'] },
+            { vertices: ['K', 'F', 'L'], midpoints: ['Ö', 'Ü', 'ß'] },
+            { vertices: ['L', 'A', 'G'], midpoints: ['N', 'M', 'O'] },
+            { vertices: ['G', 'B', 'H'], midpoints: ['P', 'Q', 'R'] },
+          ];
+
+          const midpointValues = {
+            M: calculation.M,
+            N: calculation.N,
+            O: calculation.O,
+            P: calculation.P,
+            Q: calculation.Q,
+            R: calculation.R,
+            S: calculation.S,
+            T: calculation.T,
+            U: calculation.U,
+            V: calculation.V,
+            W: calculation.W,
+            X: calculation.X,
+            Y: calculation.Y,
+            Z: calculation.Z,
+            Ä: calculation.Ä,
+            Ö: calculation.Ö,
+            Ü: calculation.Ü,
+            ß: calculation.ß,
+          };
+
+          innerTriangles.forEach((triangle) => {
+            const [v1, v2, v3] = triangle.vertices;
+            const [m1, m2, m3] = triangle.midpoints;
+
+            const p1 = pointsMap[v1];
+            const p2 = pointsMap[v2];
+            const p3 = pointsMap[v3];
+
+            const mid1 = {
+              x: (p1.x + p2.x) / 2,
+              y: (p1.y + p2.y) / 2,
+              letter: m1,
+              value: midpointValues[m1],
+            };
+
+            const mid2 = {
+              x: (p2.x + p3.x) / 2,
+              y: (p2.y + p3.y) / 2,
+              letter: m2,
+              value: midpointValues[m2],
+            };
+
+            const mid3 = {
+              x: (p3.x + p1.x) / 2,
+              y: (p3.y + p1.y) / 2,
+              letter: m3,
+              value: midpointValues[m3],
+            };
+
+            points.push(mid1, mid2, mid3);
+            pointsMap[m1] = mid1;
+            pointsMap[m2] = mid2;
+            pointsMap[m3] = mid3;
+          });
+
+          return points;
+        }
+
+        drawStarLines(svg, points) {
+          const pointsMap = {};
+          points.forEach((p) => {
+            pointsMap[p.letter] = p;
+          });
+
+          this.drawTriangle(svg, pointsMap['C'], pointsMap['E'], pointsMap['A']);
+          this.drawTriangle(svg, pointsMap['B'], pointsMap['D'], pointsMap['F']);
+
+          const innerTriangles = [
+            ['C', 'H', 'I'],
+            ['I', 'D', 'J'],
+            ['J', 'E', 'K'],
+            ['K', 'F', 'L'],
+            ['L', 'A', 'G'],
+            ['G', 'B', 'H'],
+          ];
+
+          innerTriangles.forEach(([v1, v2, v3]) => {
+            this.drawTriangle(svg, pointsMap[v1], pointsMap[v2], pointsMap[v3]);
+          });
+
+          const innermostTriangles = [
+            ['S', 'T', 'U'],
+            ['V', 'W', 'X'],
+            ['Y', 'Z', 'Ä'],
+            ['Ö', 'Ü', 'ß'],
+            ['M', 'N', 'O'],
+            ['P', 'Q', 'R'],
+          ];
+
+          innermostTriangles.forEach(([m1, m2, m3]) => {
+            this.drawTriangle(svg, pointsMap[m1], pointsMap[m2], pointsMap[m3]);
+          });
+        }
+
+        drawTriangle(svg, p1, p2, p3) {
+          const path = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+          const pathData = `M ${p1.x} ${p1.y} L ${p2.x} ${p2.y} L ${p3.x} ${p3.y} Z`;
+          path.setAttribute('d', pathData);
+          path.setAttribute('class', 'star-diagram__line');
+          svg.appendChild(path);
+        }
+
+        addPointCircles(points) {
+          points.forEach((point) => {
+            const circle = document.createElement('div');
+            circle.className = 'star-diagram__point';
+            circle.style.left = `${point.x}px`;
+            circle.style.top = `${point.y}px`;
+
+            const content = document.createElement('div');
+            content.className = 'star-diagram__content';
+
+            const letter = document.createElement('div');
+            letter.className = 'star-diagram__letter';
+            letter.textContent = point.letter;
+
+            const value = document.createElement('div');
+            value.className = 'star-diagram__value';
+            value.textContent = point.value.toString();
+
+            content.appendChild(letter);
+            content.appendChild(value);
+            circle.appendChild(content);
+
+            this.container.appendChild(circle);
+          });
+        }
+
+        clear() {
+          this.container.innerHTML = '';
+        }
+      }
+
+      // Main application
+      class NumerologyApp {
+        constructor() {
+          this.starDiagram = new StarDiagram('star-diagram');
+          this.dateInput = document.querySelector('#birthdate');
+
+          if (!this.dateInput) {
+            throw new Error('Date input element not found');
+          }
+
+          this.initializeEventListeners();
+          this.setDefaultDate();
+        }
+
+        initializeEventListeners() {
+          this.dateInput.addEventListener('change', () => {
+            this.handleDateChange();
+          });
+        }
+
+        setDefaultDate() {
+          const today = new Date();
+          const year = today.getFullYear();
+          const month = String(today.getMonth() + 1).padStart(2, '0');
+          const day = String(today.getDate()).padStart(2, '0');
+          this.dateInput.value = `${year}-${month}-${day}`;
+          this.handleDateChange();
+        }
+
+        handleDateChange() {
+          const dateValue = this.dateInput.value;
+          if (!dateValue) {
+            this.starDiagram.clear();
+            return;
+          }
+
+          const birthDate = this.parseDateInput(dateValue);
+          if (!birthDate) {
+            this.starDiagram.clear();
+            return;
+          }
+
+          if (!isValidDate(birthDate.day, birthDate.month, birthDate.year)) {
+            console.error('Invalid date');
+            this.starDiagram.clear();
+            return;
+          }
+
+          const calculation = calculateNumerology(birthDate);
+          this.starDiagram.render(calculation);
+        }
+
+        parseDateInput(dateString) {
+          try {
+            const [year, month, day] = dateString.split('-').map(Number);
+            return { day, month, year };
+          } catch (error) {
+            console.error('Failed to parse date:', error);
+            return null;
+          }
+        }
+      }
+
+      // Initialize the application when DOM is ready
+      document.addEventListener('DOMContentLoaded', () => {
+        new NumerologyApp();
+      });
+    </script>
+  </body>
+</html>
