@@ -8,8 +8,8 @@
       :root {
         --color-primary: #ffd700;
         --color-secondary: #ffeb3b;
-        --color-background: #091139;
-        --color-card-bg: rgba(255, 255, 255, 0.1);
+        --color-background: #456a03;
+        --color-card-bg: #f9f4e2;
         --color-text: #ffffff;
         --color-text-light: #cccccc;
         --color-border: rgba(255, 255, 255, 0.3);
@@ -58,17 +58,6 @@
         flex-shrink: 0;
       }
 
-      .header {
-        margin-bottom: var(--spacing-md);
-      }
-
-      .header__title {
-        font-size: 2rem;
-        color: var(--color-primary);
-        font-weight: 600;
-        line-height: 1.2;
-      }
-
       .date-picker-section {
         background: var(--color-card-bg);
         padding: var(--spacing-md);
@@ -80,7 +69,7 @@
         display: block;
         margin-bottom: var(--spacing-sm);
         font-weight: 500;
-        color: var(--color-text);
+        color: #333333;
       }
 
       .date-picker__input {
@@ -98,6 +87,36 @@
         border-color: var(--color-primary);
       }
 
+      .calculate-btn {
+        width: 100%;
+        padding: var(--spacing-sm);
+        margin-top: var(--spacing-sm);
+        background-color: #e98c00;
+        color: #ffffff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 600;
+        font-family: inherit;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .calculate-btn:hover {
+        background-color: #d17d00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+      }
+
+      .calculate-btn:active {
+        transform: translateY(0);
+      }
+
+      .calculate-btn:focus {
+        outline: 2px solid var(--color-text);
+        outline-offset: 2px;
+      }
+
       .star-section {
         flex: 1;
         display: flex;
@@ -106,7 +125,6 @@
         margin-top: -60px;
       }
 
-      /* Star diagram styles */
       .star-diagram {
         position: relative;
         width: 800px;
@@ -167,8 +185,21 @@
         color: #333333;
       }
 
-      /* Responsive design */
       @media (max-width: 1024px) {
+        .main {
+          flex-direction: column;
+          align-items: center;
+        }
+
+        .left-panel {
+          width: 100%;
+          max-width: 400px;
+        }
+
+        .star-section {
+          margin-top: 0;
+        }
+
         .star-diagram {
           width: 600px;
           height: 600px;
@@ -181,31 +212,7 @@
         }
       }
 
-      @media (max-width: 1024px) {
-        .main {
-          flex-direction: column;
-          align-items: center;
-        }
-
-        .left-panel {
-          width: 100%;
-          max-width: 400px;
-        }
-
-        .header {
-          text-align: center;
-        }
-
-        .star-section {
-          margin-top: 0;
-        }
-      }
-
       @media (max-width: 768px) {
-        .header__title {
-          font-size: 1.75rem;
-        }
-
         .container {
           padding: var(--spacing-sm);
         }
@@ -245,13 +252,10 @@
     <div class="container">
       <main class="main">
         <div class="left-panel">
-          <header class="header">
-            <h1 class="header__title">Numerology Calculator</h1>
-          </header>
-
           <section class="date-picker-section">
             <label for="birthdate" class="date-picker__label">Enter your birth date:</label>
             <input type="date" id="birthdate" class="date-picker__input" aria-label="Birth date" />
+            <button type="button" id="calculate-btn" class="calculate-btn">Calculate</button>
           </section>
         </div>
 
@@ -364,11 +368,7 @@
       // StarDiagram class
       class StarDiagram {
         constructor(containerId) {
-          const element = document.querySelector(`#${containerId}`);
-          if (!element) {
-            throw new Error(`Container with id "${containerId}" not found`);
-          }
-          this.container = element;
+          this.container = document.getElementById(containerId);
           this.width = 800;
           this.height = 800;
           this.centerX = this.width / 2;
@@ -386,6 +386,50 @@
           this.addPointCircles(points);
         }
 
+        renderEmpty() {
+          this.container.innerHTML = '';
+
+          const svg = this.createSVG();
+          this.container.appendChild(svg);
+
+          const emptyCalculation = {
+            A: 0,
+            B: 0,
+            C: 0,
+            D: 0,
+            E: 0,
+            F: 0,
+            G: 0,
+            H: 0,
+            I: 0,
+            J: 0,
+            K: 0,
+            L: 0,
+            M: 0,
+            N: 0,
+            O: 0,
+            P: 0,
+            Q: 0,
+            R: 0,
+            S: 0,
+            T: 0,
+            U: 0,
+            V: 0,
+            W: 0,
+            X: 0,
+            Y: 0,
+            Z: 0,
+            Ä: 0,
+            Ö: 0,
+            Ü: 0,
+            ß: 0,
+          };
+
+          const points = this.calculatePointPositions(emptyCalculation);
+          this.drawStarLines(svg, points);
+          this.addPointCirclesEmpty(points);
+        }
+
         createSVG() {
           const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
           svg.setAttribute('class', 'star-diagram__svg');
@@ -398,12 +442,12 @@
           const points = [];
           const pointsMap = {};
 
-          const angleA = 90; // A at bottom
-          const angleB = 90 + 60; // B at bottom-left (150°)
-          const angleC = 90 + 120; // C at top-left (210°)
-          const angleD = 90 + 180; // D at top (270° = -90°)
-          const angleE = 90 + 240; // E at top-right (330° = -30°)
-          const angleF = 90 + 300; // F at bottom-right (30°)
+          const angleA = 90;
+          const angleB = 90 + 60;
+          const angleC = 90 + 120;
+          const angleD = 90 + 180;
+          const angleE = 90 + 240;
+          const angleF = 90 + 300;
 
           const mainVertices = [
             { letter: 'A', value: calculation.A, angle: angleA },
@@ -492,14 +536,12 @@
               letter: m1,
               value: midpointValues[m1],
             };
-
             const mid2 = {
               x: (p2.x + p3.x) / 2,
               y: (p2.y + p3.y) / 2,
               letter: m2,
               value: midpointValues[m2],
             };
-
             const mid3 = {
               x: (p3.x + p1.x) / 2,
               y: (p3.y + p1.y) / 2,
@@ -586,6 +628,27 @@
           });
         }
 
+        addPointCirclesEmpty(points) {
+          points.forEach((point) => {
+            const circle = document.createElement('div');
+            circle.className = 'star-diagram__point';
+            circle.style.left = `${point.x}px`;
+            circle.style.top = `${point.y}px`;
+
+            const content = document.createElement('div');
+            content.className = 'star-diagram__content';
+
+            const letter = document.createElement('div');
+            letter.className = 'star-diagram__letter';
+            letter.textContent = point.letter;
+
+            content.appendChild(letter);
+            circle.appendChild(content);
+
+            this.container.appendChild(circle);
+          });
+        }
+
         clear() {
           this.container.innerHTML = '';
         }
@@ -595,32 +658,18 @@
       class NumerologyApp {
         constructor() {
           this.starDiagram = new StarDiagram('star-diagram');
-          this.dateInput = document.querySelector('#birthdate');
+          this.dateInput = document.getElementById('birthdate');
+          this.calculateBtn = document.getElementById('calculate-btn');
 
-          if (!this.dateInput) {
-            throw new Error('Date input element not found');
-          }
-
-          this.initializeEventListeners();
-          this.setDefaultDate();
-        }
-
-        initializeEventListeners() {
-          this.dateInput.addEventListener('change', () => {
-            this.handleDateChange();
+          this.calculateBtn.addEventListener('click', () => {
+            this.handleCalculate();
           });
+
+          // Show empty star structure initially
+          this.starDiagram.renderEmpty();
         }
 
-        setDefaultDate() {
-          const today = new Date();
-          const year = today.getFullYear();
-          const month = String(today.getMonth() + 1).padStart(2, '0');
-          const day = String(today.getDate()).padStart(2, '0');
-          this.dateInput.value = `${year}-${month}-${day}`;
-          this.handleDateChange();
-        }
-
-        handleDateChange() {
+        handleCalculate() {
           const dateValue = this.dateInput.value;
           if (!dateValue) {
             this.starDiagram.clear();
